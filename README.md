@@ -12,7 +12,7 @@ You want a better social profile pic: more professional, or cartoonized, or a sp
 
 Cookie auth, profile (HTTP and the AI tool share `get_profile`), `/photos`, public `/uploads` and `/generated`, frontend-only presets, then a two-step OpenRouter call (tool, then image). The user only ever sees the image.
 
-```
+```plain
 photogen/
   backend/
     app/main.py              # FastAPI, CORS, static mounts
@@ -37,7 +37,7 @@ photogen/
 
 ## Each phase checklist
 
-**Phase 1 - Backend**
+### Phase 1 - Backend
 
 ```bash
 cd backend
@@ -46,17 +46,17 @@ uv sync
 uv run poe dev
 ```
 
-**Phase 2 - Frontend**
+### Phase 2 - Frontend
 
 ```bash
 cd frontend
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Login/register UI (preferences on register), presets only change the prompt, gallery shows original and generated.
 
-**Phase 3 - Integration**
+### Phase 3 - Integration
 
 Both running. Vite proxies `/api`, `/uploads`, `/generated`. Cookie + CORS. Register prefs → profile matches the form → generate → gallery shows both → public image URLs load → refine → logout.
 
