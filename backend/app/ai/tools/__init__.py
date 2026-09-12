@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+from openrouter import errors
 from typing import Any, cast
 
 from pydantic import ValidationError
@@ -48,13 +50,23 @@ def fetch_profile_from_model(db: Session, profile_id: int) -> Profile:
             rounds += 1
             if rounds > 8:
                 raise AIError("Profile tool loop ran too long")
-            result = client.chat.send(
-                messages=cast(Any, messages),
-                model=chat_model_name(),
-                tools=cast(Any, TOOLS),
-                stream=False,
-                timeout_ms=120_000,
-            )
+            try:
+                result = client.chat.send(
+                    messages=cast(Any, messages),
+                    model=chat_model_name(),
+                    tools=cast(Any, TOOLS),
+                    stream=False,
+                    timeout_ms=120_000,
+                )
+            except errors.TooManyRequestsResponseError:
+                wait = min(2 ** rounds, 16)
+                log.warning(
+                    "OpenRouter rate limited request; retrying in %ss",
+                    wait,
+                )
+                time.sleep(wait)
+                continue
+            
             message = result.choices[0].message
             calls = tool_calls_on(message)
             if calls:
